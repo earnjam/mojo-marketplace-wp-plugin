@@ -5,7 +5,7 @@ This file tracks basic user actions to improve the user experience.
 
 function mm_ux_log( $args = array() ) {
 	$url = "https://ssl.google-analytics.com/collect";
-	
+
 	global $title;
 
 	if ( empty( $_SERVER['REQUEST_URI'] ) ) {
@@ -17,7 +17,7 @@ function mm_ux_log( $args = array() ) {
 	if ( empty( $path ) || empty( $path[1] ) ) {
 		$path = array( "", " " );
 	}
-	
+
 	$defaults = array(
 		'v'		=> '1',
 		'tid'	=> 'UA-39246514-3',
@@ -40,7 +40,7 @@ function mm_ux_log( $args = array() ) {
 		'ev'	=> '', //event value
 	);
 
-	if( isset( $_SERVER['REMOTE_ADDR'] ) ) {
+	if ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
 		$defaults['uip'] = $_SERVER['REMOTE_ADDR'];
 	}
 
@@ -48,13 +48,13 @@ function mm_ux_log( $args = array() ) {
 
 	$test = get_transient( 'mm_test', '' );
 
-	if( isset( $test['key'] ) && isset( $test['name'] ) ) {
+	if ( isset( $test['key'] ) && isset( $test['name'] ) ) {
 		$params['cm'] = $params['cm'] . "_" . $test['name'] . "_" . $test['key'];
 	}
 
 	//use test account for testing
-	if( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-		$params['tid'] = 'UA-19617272-27'; 
+	if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+		$params['tid'] = 'UA-19617272-27';
 	}
 
 	$z = wp_rand( 0, 1000000000 );
@@ -64,21 +64,23 @@ function mm_ux_log( $args = array() ) {
 	$args = array(
 		'body'		=> $query,
 		'method'	=> 'POST',
-		'blocking'	=> false
+		'blocking'	=> false,
+		'timeout'   => 0.1,
 	);
 
 	$url = add_query_arg( array( 'z' => $z ), $url );
 	wp_remote_post( $url, $args );
 }
 add_action( 'admin_footer', 'mm_ux_log', 9 );
+add_action( 'customize_controls_print_footer_scripts', 'mm_ux_log' );
 
 function mm_ux_log_start() {
 	$session = array(
-		'sc'	=> 'start'
+		'sc' => 'start',
 	);
 	mm_ux_log( $session );
 	$event = array(
-		't' => 'event',
+		't'  => 'event',
 		'ec' => 'user_action',
 		'ea' => 'login',
 	);
@@ -88,13 +90,13 @@ add_action( 'wp_login', 'mm_ux_log_start' );
 
 function mm_ux_log_end() {
 	$session = array(
-		'sc'	=> 'end'
+		'sc' => 'end',
 	);
 	mm_ux_log( $session );
 	$user = get_user_by( 'id', get_current_user_id() );
 	$role = $user->roles;
 	$event = array(
-		't' => 'event',
+		't'  => 'event',
 		'ec' => 'user_action',
 		'ea' => 'logout',
 		'el' => $role[0],
@@ -153,7 +155,7 @@ function mm_ux_log_theme_category_org() {
 	if( isset( $_GET['browse'] ) ) {
 		$category = esc_attr( $_GET['browse'] );
 	} else {
-		$category = "featured";
+		$category = 'featured';
 	}
 	$event = array(
 		't'		=> 'event',
@@ -541,7 +543,7 @@ function mm_endpoint_action_browse_all_themes() {
 add_action( 'mm_endpoint-browse_all_themes', 'mm_endpoint_action_browse_all_themes' );
 
 function mm_ux_log_btn_click() {
-	if( isset( $_GET['page'] ) && $_GET['page'] == "mojo-themes" ) {
+	if( isset( $_GET['page'] ) && $_GET['page'] == 'mojo-themes' ) {
 		if( isset( $_GET['btn'] ) ) {
 			$event = array(
 				't'		=> 'event',
@@ -554,17 +556,6 @@ function mm_ux_log_btn_click() {
 	}
 }
 add_action( 'admin_footer', 'mm_ux_log_btn_click' );
-
-function mm_jetpack_jps_action( $action ) {
-	$event = array(
-		't'     => 'event',
-		'ec'    => 'jetpack_event',
-		'ea'    => 'jps_action',
-		'el'    => $action,
-	);
-	mm_ux_log( $event );
-}
-add_action( 'jetpack_start_welcome_panel_action', 'mm_jetpack_jps_action' );
 
 function mm_jetpack_log_module_enabled( $module ) {
 	$event = array(
@@ -611,20 +602,124 @@ function mm_jetpack_log_connected( $entry ) {
 }
 add_action( 'jetpack_log_entry', 'mm_jetpack_log_connected', 10, 1 );
 
-function mm_jetpack_log_jps_time() {
-	if( isset( $_GET['welcome-screen-hide'] ) ) {
-		$start_time = get_option( 'jps_started', false );
-		if( $start_time ) {
-			$now = time();
-			$completion_time = $now - $start_time;
-			$event = array(
-				't'     => 'event',
-				'ec'    => 'jetpack_event',
-				'ea'    => 'jps_completion_time',
-				'el'    => $completion_time
-			);
-			mm_ux_log( $event );
-		}
+/* JPS v8 specific events */
+
+function mm_jps_started() {
+	update_option( 'jps_started', time() );
+}
+add_action( 'jps_started', 'mm_jps_started' );
+
+function mm_jps_step_skipped( $step, $data ) {
+	$event = array(
+		't'     => 'event',
+		'ec'    => 'jetpack_event',
+		'ea'    => 'step_skipped_' . $step,
+		'el'    => $step,
+	);
+	mm_ux_log( $event );
+}
+add_action( 'jps_step_skipped', 'mm_jps_step_skipped', 10, 2 );
+
+function mm_jps_step_complete( $step, $data ) {
+	$event = array(
+		't'     => 'event',
+		'ec'    => 'jetpack_event',
+		'ea'    => 'step_complete_' . $step,
+		'el'    => $step,
+	);
+
+	if ( 'design' == $step && isset( $data['themeId'] ) ) {
+		$event['el'] = $data['themeId'];
+	}
+
+	mm_ux_log( $event );
+
+	if ( isset( $data['completion'] ) ) {
+		$started = get_option( 'jps_started', time() );
+		$completion = time() - $started;
+		$event = array(
+			't'  => 'event',
+			'ec' => 'jetpack_event',
+			'ea' => 'jps_completion_time_' . $step,
+			'el' => $completion,
+		);
+		mm_ux_log( $event );
 	}
 }
-add_action( 'admin_init', 'mm_jetpack_log_jps_time' );
+add_action( 'jps_step_complete', 'mm_jps_step_complete', 10, 2 );
+
+function mm_jps_step_viewed( $step ) {
+	update_option( 'jps_current_step', $step );
+	$event = array(
+		't'     => 'event',
+		'ec'    => 'jetpack_event',
+		'ea'    => 'jps_view',
+		'el'    => $step,
+	);
+	mm_ux_log( $event );
+}
+add_action( 'jps_step_viewed','mm_jps_step_viewed' );
+
+function mm_jps_dismiss_welcome( $null, $object_id, $meta_key, $meta_value ) {
+	if ( 'show_welcome_panel' == $meta_key && 0 == $meta_value ) {
+		$event = array(
+			't'     => 'event',
+			'ec'    => 'user_action',
+			'ea'    => 'jps_dismiss',
+			'el'    => get_option( 'jps_current_step', 'initial' ),
+		);
+		mm_ux_log( $event );
+	}
+	return null;
+}
+add_filter( 'updated_user_metadata', 'mm_jps_dismiss_welcome', 10, 4 );
+
+function mm_ux_site_launched( $new_option, $old_option ) {
+	if ( $old_option != $new_option && 'true' == $new_option ) {
+		$install_time = strtotime( get_option( 'mm_install_date', date( 'M d, Y' ) ) );
+		$event = array(
+			't'     => 'event',
+			'ec'    => 'user_action',
+			'ea'    => 'site_launched',
+			'el'    => time() - $install_time,
+		);
+		mm_ux_log( $event );
+	}
+	return $new_option;
+}
+add_filter( 'pre_update_option_mm_coming_soon', 'mm_ux_site_launched', 10, 2 );
+
+
+function mm_ux_auto_core_upgrade() {
+	global $wp_version;
+	$event = array(
+		't'     => 'event',
+		'ec'    => 'scheduled',
+		'ea'    => 'auto_core_update',
+		'el'    => $wp_version,
+	);
+	mm_ux_log( $event );
+}
+add_action( 'pre_update_option_auto_updater.lock', 'mm_ux_auto_core_upgrade' );
+
+function mm_sso_success() {
+	$event = array(
+		't'     => 'event',
+		'ec'    => 'user_action',
+		'ea'    => 'sso',
+		'el'    => 'success',
+	);
+	mm_ux_log( $event );
+}
+add_action( 'mmsso_success', 'mm_sso_success' );
+
+function mm_sso_fail() {
+	$event = array(
+		't'     => 'event',
+		'ec'    => 'user_action',
+		'ea'    => 'sso',
+		'el'    => 'fail',
+	);
+	mm_ux_log( $event );
+}
+add_action( 'mmsso_fail', 'mm_sso_fail' );

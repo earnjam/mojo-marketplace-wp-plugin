@@ -21,7 +21,7 @@ function mm_setup() {
 add_action( 'init', 'mm_setup' );
 
 function mm_api( $args = array(), $query = array() ) {
-	$api_url = 'http://mojomarketplace.com/api/v1/';
+	$api_url = 'http://api.mojomarketplace.com/api/v1/';
 	$default_args = array(
 		'mojo-platform' 	=> 'wordpress',
 		'mojo-type' 		=> 'themes',
@@ -38,7 +38,6 @@ function mm_api( $args = array(), $query = array() ) {
 
 	$request_url = rtrim( $request_url, '/' );
 	$request_url = $request_url . '?' . $query;
-
 	$key = md5( $request_url );
 
 	if ( false === ( $transient = get_transient( 'mm_api_calls' ) ) || ! isset( $transient[ $key ] ) ) {
@@ -75,7 +74,7 @@ function mm_build_link( $url, $args = array() ) {
 
 function mm_clear_api_calls() {
 	if ( is_admin() ) {
-		delete_transient( 'mojo-api-calls' );
+		delete_transient( 'mojo_api_calls' );
 	}
 }
 add_action( 'wp_login', 'mm_clear_api_calls' );
@@ -100,7 +99,7 @@ function mm_cron() {
 }
 add_action( 'admin_init', 'mm_cron' );
 
-function mm_cron_schedules( $shedules ) {
+function mm_cron_schedules( $schedules ) {
 	$schedules['weekly'] = array(
 		'interval' => 604800,
 		'display' => __( 'Once Weekly' )
@@ -113,6 +112,37 @@ function mm_cron_schedules( $shedules ) {
 }
 add_filter( 'cron_schedules', 'mm_cron_schedules' );
 
+function mm_all_api_calls() {
+	$calls = array(
+		array( 'mojo-platform' => 'wordpress', 'mojo-type' => 'themes', 'mojo-items' => 'popular' ),
+		array( 'mojo-platform' => 'wordpress', 'mojo-type' => 'themes', 'mojo-items' => 'recent' ),
+
+		array( 'mojo-platform' => 'wordpress', 'mojo-type' => 'responsive', 'mojo-items' => 'category_items' ),
+		array( 'mojo-platform' => 'wordpress', 'mojo-type' => 'business', 'mojo-items' => 'category_items' ),
+		array( 'mojo-platform' => 'wordpress', 'mojo-type' => 'ecommerce', 'mojo-items' => 'category_items' ),
+		array( 'mojo-platform' => 'wordpress', 'mojo-type' => 'photography', 'mojo-items' => 'category_items' ),
+		array( 'mojo-platform' => 'wordpress', 'mojo-type' => 'real-estate', 'mojo-items' => 'category_items' ),
+		array( 'mojo-platform' => 'wordpress', 'mojo-type' => 'restaurant', 'mojo-items' => 'category_items' ),
+
+		array( 'mojo-platform' => 'wordpress', 'mojo-type' => '', 'mojo-items' => 'popular-services' ),
+
+	);
+	foreach ( $calls as $call ) {
+		mm_api( $call );
+	}
+	die;
+}
+add_action( 'wp_ajax_all-api-calls', 'mm_all_api_calls' );
+
+function mm_preload_api_calls() {
+	//this makes the themes/services pages load much quicker
+	//without effect on the user
+	$admin_ajax = admin_url( 'admin-ajax.php' );
+	$params = array( 'action' => 'all-api-calls' );
+	$url = $admin_ajax . '?' . http_build_query( $params );
+	$res = wp_remote_get( $url, array( 'blocking' => false, 'timeout' => 0.1 ) );
+}
+add_action( 'admin_footer-index.php', 'mm_preload_api_calls', 99 );
 
 function mm_slug_to_title( $slug ) {
 	$words = explode( '-', $slug );
@@ -132,8 +162,9 @@ function mm_require( $file ) {
 	$file = apply_filters( 'mm_require_file', $file );
 	if ( file_exists( $file ) ) {
 		require( $file );
+		return $file;
 	}
-	return $file;
+	return false;
 }
 
 function mm_minify( $content ) {
@@ -161,3 +192,4 @@ function mm_adjust_feed_transient_lifetime( $lifetime ) {
 	return 10800;
 }
 add_filter( 'wp_feed_cache_transient_lifetime', 'mm_adjust_feed_transient_lifetime' );
+
