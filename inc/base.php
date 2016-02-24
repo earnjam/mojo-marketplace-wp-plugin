@@ -1,8 +1,8 @@
 <?php
 
 function mm_setup() {
-	if ( ! get_option( 'mm_master_aff' ) ) {
-		update_option( 'mm_master_aff', ( defined( 'MMAFF' ) ? MMAFF : '' ) );
+	if ( ( '' === get_option( 'mm_master_aff' ) || false === get_option( 'mm_master_aff' ) ) && defined( 'MMAFF' ) ) {
+		update_option( 'mm_master_aff', MMAFF );
 	}
 	if ( ! get_option( 'mm_install_date' ) ) {
 		update_option( 'mm_install_date', date( 'M d, Y' ) );
@@ -74,7 +74,7 @@ function mm_build_link( $url, $args = array() ) {
 
 function mm_clear_api_calls() {
 	if ( is_admin() ) {
-		delete_transient( 'mojo_api_calls' );
+		delete_transient( 'mojo-api-calls' );
 	}
 }
 add_action( 'wp_login', 'mm_clear_api_calls' );
@@ -101,11 +101,11 @@ add_action( 'admin_init', 'mm_cron' );
 
 function mm_cron_schedules( $schedules ) {
 	$schedules['weekly'] = array(
-		'interval' => 604800,
+		'interval' => WEEK_IN_SECONDS,
 		'display' => __( 'Once Weekly' )
 	);
 	$schedules['monthly'] = array(
-		'interval' => 2635200,
+		'interval' => 4 * WEEK_IN_SECONDS,
 		'display' => __( 'Once a month' )
 	);
 	return $schedules;
@@ -145,17 +145,11 @@ function mm_preload_api_calls() {
 add_action( 'admin_footer-index.php', 'mm_preload_api_calls', 99 );
 
 function mm_slug_to_title( $slug ) {
-	$words = explode( '-', $slug );
-	$capital_words = array_map( 'ucfirst', $words );
-	$title = implode( ' ', $capital_words );
-	return $title;
+	return ucwords( str_replace( '-', ' ', $slug ) );
 }
 
 function mm_title_to_slug( $title ) {
-	$words = explode( ' ', $title );
-	$lowercase_words = array_map( 'strtolower', $words );
-	$slug = implode( '-', $lowercase_words );
-	return $slug;
+	return sanitize_title( $title );
 }
 
 function mm_require( $file ) {
@@ -189,7 +183,6 @@ add_filter( 'dashboard_secondary_feed', 'mm_better_news_feed' );
 add_filter( 'dashboard_secondary_link', 'mm_better_news_feed' );
 
 function mm_adjust_feed_transient_lifetime( $lifetime ) {
-	return 10800;
+	return 3 * HOUR_IN_SECONDS;
 }
 add_filter( 'wp_feed_cache_transient_lifetime', 'mm_adjust_feed_transient_lifetime' );
-
