@@ -35,7 +35,7 @@ add_filter( 'pre_set_site_transient_update_plugins', 'mm_check_for_plugin_update
 
 function mm_plugin_api_call( $def, $action, $args ) {
 
-	if ( $args->slug != MM_PLUGIN_SLUG ) {
+	if ( isset( $args->slug ) && $args->slug != MM_PLUGIN_SLUG ) {
 		return $def;
 	}
 
@@ -49,9 +49,6 @@ function mm_plugin_api_call( $def, $action, $args ) {
 		$res = new WP_Error( 'plugins_api_failed', __( 'An Unexpected HTTP Error occurred during the API request.</p> <p><a href="?" onclick="document.location.reload(); return false;">Try again</a>' ), $request->get_error_message() );
 	} else {
 		$res = unserialize( $request['body'] );
-		if ( false === $res ) {
-			$res = new WP_Error( 'plugins_api_failed', __( 'An unknown error occurred' ), $request['body'] );
-		}
 	}
 	$active = get_option( 'active_plugins' );
 	$active[] = 'mojo-marketplace-wp-plugin/mojo-marketplace.php';

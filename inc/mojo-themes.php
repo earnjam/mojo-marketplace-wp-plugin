@@ -27,26 +27,12 @@ function mm_add_premium_link() {
 add_action( 'admin_head-theme-install.php', 'mm_add_premium_link' );
 
 function mm_add_theme_page() {
-	add_theme_page( 'MOJO Themes', 'MOJO Themes', 'install_themes', 'mojo-themes', 'mm_theme_page' );
+	add_theme_page( 'Premium Themes', 'Premium Themes', 'install_themes', 'mojo-themes', 'mm_theme_page' );
 }
 add_action( 'admin_menu', 'mm_add_theme_page' );
 
 function mm_theme_page() {
-	add_thickbox();
 	mm_require( MM_BASE_DIR . '/pages/mojo-themes.php' );
-	?>
-	<script type="text/javascript">
-	jQuery( '.thickbox' ).each( function( index, value ) {
-		var w = Math.floor( window.innerWidth * .85 );
-		var h = Math.floor( window.innerHeight * .85 );
-		var href = jQuery( this ).attr( 'href' );
-		var find = 'width=1200&height=800';
-		var replace = 'width=' + w + '&height=' + h;
-		href = href.replace( find, replace )
-		jQuery( this ).attr( 'href', href );
-	} );
-	</script>
-	<?php
 }
 
 function mm_theme_preview_page() {
