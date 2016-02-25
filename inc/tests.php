@@ -89,3 +89,4 @@ function mm_jpo_test_exempt() {
 }
 add_action( 'init', 'mm_jpo_test_exempt', 9 );
 
+mm_require( MM_BASE_DIR . 'tests/test-loader.php' );
