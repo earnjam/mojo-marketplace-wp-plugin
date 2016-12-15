@@ -39,8 +39,8 @@ $php_edge_settings = wp_parse_args( $php_edge_settings, $defaults );
 							</ol>
 						</div>
 					</div>
-					</div>
-					<div class="panel-body">
+				</div>
+				<div class="panel-body">
 					<div class="row">
 						<div class="col-xs-12 col-sm-6">
 							Page Cache
@@ -79,17 +79,30 @@ $php_edge_settings = wp_parse_args( $php_edge_settings, $defaults );
 							}
 							?>
 						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<?php if ( mm_brand() == 'bluehost' ) { ?>
+		<div class="container">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<div class="row">
+						<div class="col-xs-12 col-sm-12">
+							<ol class="breadcrumb">
+								<li>PHP</li>
+							</ol>
 						</div>
 					</div>
-					<div class="panel-body">
+				</div>
+				<div class="panel-body">
 					<div class="row">
 						<div class="col-xs-12 col-sm-6">
 							PHP Edge
 							<p style="padding-top: 15px;">
 								<img style="margin: 5px; padding-right: 10px;" class="pull-left" src="<?php echo MM_BASE_URL; ?>tmp/php.png" />
-								Using the PHP edge will improve your WordPress site performance and speed.
+								PHP is the programing language that WordPress is written in. Running the latest and greatest version has large performance and load time improvements. Enabling PHP Edge will allow you to always remain on the latest and greatest version.
 							</p>
-							<br/>
 							<?php
 							if ( 'enabled' == $php_edge_settings['page'] ) {
 								?>
@@ -106,6 +119,7 @@ $php_edge_settings = wp_parse_args( $php_edge_settings, $defaults );
 				</div>
 			</div>
 		</div>
+		<?php } ?>
 	</main>
 </div>
 <script type="text/javascript">
