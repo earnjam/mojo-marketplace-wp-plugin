@@ -8,6 +8,7 @@ $defaults = array(
 	'page'    => 'disabled',
 	'browser' => 'disabled',
 	'object'  => 'disabled',
+	'php_edge'  => 'disabled',
 );
 
 if ( file_exists( WP_CONTENT_DIR . '/mu-plugins/endurance-page-cache.php' ) ) {
@@ -18,8 +19,14 @@ if ( file_exists( WP_CONTENT_DIR . '/mu-plugins/endurance-browser-cache.php' ) )
 	$defaults['browser'] = 'enabled';
 }
 
+if ( file_exists( WP_CONTENT_DIR . '/mu-plugins/endurance-php-edge.php' ) ) {
+	$defaults['php_edge'] = 'enabled';
+}
+
 $cache_settings = get_option( 'mm_cache_settings' );
 $cache_settings = wp_parse_args( $cache_settings, $defaults );
+$php_edge_settings = get_option( 'mm_php_edge_settings' );
+$php_edge_settings = wp_parse_args( $php_edge_settings, $defaults );
 ?>
 	<main id="main">
 		<div class="container">
@@ -32,8 +39,8 @@ $cache_settings = wp_parse_args( $cache_settings, $defaults );
 							</ol>
 						</div>
 					</div>
-				</div>
-				<div class="panel-body">
+					</div>
+					<div class="panel-body">
 					<div class="row">
 						<div class="col-xs-12 col-sm-6">
 							Page Cache
@@ -72,6 +79,29 @@ $cache_settings = wp_parse_args( $cache_settings, $defaults );
 							}
 							?>
 						</div>
+						</div>
+					</div>
+					<div class="panel-body">
+					<div class="row">
+						<div class="col-xs-12 col-sm-6">
+							PHP Edge
+							<p style="padding-top: 15px;">
+								<img style="margin: 5px; padding-right: 10px;" class="pull-left" src="<?php echo MM_BASE_URL; ?>tmp/php.png" />
+								Using the PHP edge will improve your WordPress site performance and speed.
+							</p>
+							<br/>
+							<?php
+							if ( 'enabled' == $php_edge_settings['page'] ) {
+								?>
+								<button data-type="php_edge" data-status="enabled" class="mojo-php_edge-toggle btn btn-primary btn-md">Disable</button>
+								<?php
+							} else {
+								?>
+								<button data-type="php_edge" data-status="disabled" class="mojo-php_edge-toggle btn btn-success btn-md">Enable</button>
+								<?php
+							}
+							?>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -90,6 +120,50 @@ jQuery( document ).ready( function( $ ) {
 		$.post( ajaxurl, cache_data, function( cache_response ) {
 			try {
 				response = JSON.parse( cache_response );
+			} catch (e) {
+				response = {status:"error", message:"Invalid JSON response."};
+			}
+
+			if ( typeof response.message !== 'undefined' ) {
+				$( '#mojo-wrapper' ).append( '<div id="mm-message" class="mm-' + response.status + '" style="display:none;">' + response.message + '</div>' );
+				$( '#mm-message' ).fadeIn( 'slow', function() {
+					if ( response.status == 'success' ) {
+						if ( button.data( 'status' ) == 'disabled' ) {
+							button.data( 'status', 'enabled' );
+							button.removeClass( 'btn-success' );
+							button.addClass( 'btn-primary' );
+							button.html( 'Disable' );
+						} else {
+							button.data( 'status', 'disabled' );
+							button.removeClass( 'btn-primary' );
+							button.addClass( 'btn-success' );
+							button.html( 'Enable' );
+						}
+					}
+					setTimeout( function() {
+						$( '#mm-message' ).fadeOut( 'fast', function() {
+							$( '#mm-message' ).remove();
+						} );
+					}, 8000 );
+				} );
+			}
+
+		} );
+	} );
+} );
+</script>
+<script type="text/javascript">
+jQuery( document ).ready( function( $ ) {
+	$( '.mojo-php_edge-toggle' ).click( function () {
+		var php_edge_data = {
+			'action'         : 'mm_php_edge',
+			'type'           : $( this ).data( 'type' ) ,
+			'current_status' : $( this ).data( 'status' )
+		}
+		var button = $(this);
+		$.post( ajaxurl, php_edge_data, function( php_edge_response ) {
+			try {
+				response = JSON.parse( php_edge_response );
 			} catch (e) {
 				response = {status:"error", message:"Invalid JSON response."};
 			}

@@ -48,6 +48,50 @@ function mm_cache_toggle() {
 }
 add_action( 'wp_ajax_mm_cache', 'mm_cache_toggle' );
 
+function mm_php_edge_toggle() {
+if ( isset( $_POST['type'] ) && isset( $_POST['current_status'] ) ) {
+		$defaults = array(
+			'php_edge'  => 'disabled',
+		);
+		$cache_settings = get_option( 'mm_php_edge_settings' );
+		$cache_settings = wp_parse_args( $php_edge_settings, $defaults );
+		$valid_php_edge_names = array(
+			'php_edge',
+		);
+		$valid_status = array(
+			'enabled',
+			'disabled',
+		);
+
+		if ( in_array( $_POST['current_status'], $valid_status ) ) {
+			$new_status = ( 'disabled' == $_POST['current_status'] ) ? 'enabled': 'disabled';
+		} else {
+			$response = array( 'status' => 'error', 'message' => 'Invalid status.' );
+		}
+
+		if ( in_array( $_POST['type'], $valid_php_edge_names ) && ! isset( $response ) ) {
+			if ( 'enabled' == $new_status ) {
+				$response = mm_cache_add( $_POST['type'] );
+			} else {
+				$response = mm_cache_remove( $_POST['type'] );
+			}
+			if ( 'object' != $_POST['type'] && 'success' == $response['status'] ) {
+				save_mod_rewrite_rules();
+			}
+		} else {
+			$response = array( 'status' => 'error', 'message' => 'Invalid cache type.' );
+		}
+
+		if ( 'success' == $response['status'] ) {
+			$php_edge_settings[ $_POST['type'] ] = $new_status;
+			update_option( 'mm_cache_settings', $cache_settings );
+		}
+		echo json_encode( $response );
+	}
+	die;
+}
+add_action( 'wp_ajax_mm_php_edge', 'mm_php_edge_toggle' );
+
 function mm_cache_add( $type = null ) {
 	$cache = array();
 	if ( ! is_dir( WP_CONTENT_DIR . '/mu-plugins' ) ) {
@@ -109,6 +153,49 @@ function mm_cache_remove( $type = null ) {
 		}
 	} else {
 		$response = array( 'status' => 'error', 'message' => 'Cache file does not exist.' );
+	}
+	return $response;
+}
+
+function mm_php_edge_add( $type = null ) {
+	$php7 = array();
+	if ( ! is_dir( WP_CONTENT_DIR . '/mu-plugins' ) ) {
+		mkdir( WP_CONTENT_DIR . '/mu-plugins' );
+	}
+	switch ( $type ) {
+		case 'browser':
+			$cache['code'] = 'https://raw.githubusercontent.com/bluehost/endurance-php-edge/master/endurance-php-edge.php';
+			$cache['location'] = WP_CONTENT_DIR . '/mu-plugins/endurance-php-edge.php';
+			break;
+	}
+	if ( isset( $php_edge['code'] ) && isset( $php_edge['location'] ) ) {
+		$request = wp_remote_get( $php_edge['code'] );
+		if ( ! is_wp_error( $request ) ) {
+			file_put_contents( $php_edge['location'], $request['body'] );
+			if ( file_exists( $php_edge['location'] ) ) {
+				$response = array( 'status' => 'success', 'message' => ucfirst( $type ) . ' php edge updated successfully.' );
+			}
+		}
+	}
+	if ( ! isset( $response ) ) {
+		$response = array( 'status' => 'error', 'message' => 'Unable to add ' . ucfirst( $type ) . ' php edge.' );
+	}
+	return $response;
+}
+function mm_php_edge_remove( $type = null ) {
+	switch ( $type ) {
+		case 'php7':
+			$file = WP_CONTENT_DIR . '/mu-plugins/endurance-php-edge.php';
+			break;
+	}
+	if ( file_exists( $file ) ) {
+		if ( unlink( $file ) ) {
+			$response = array( 'status' => 'success', 'message' => ucfirst( $type ) . ' php edge successfully removed.' );
+		} else {
+			$response = array( 'status' => 'error', 'message' => 'Could not remove php edge.' );
+		}
+	} else {
+		$response = array( 'status' => 'error', 'message' => 'php edge file does not exist.' );
 	}
 	return $response;
 }
