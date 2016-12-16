@@ -25,8 +25,7 @@ if ( file_exists( WP_CONTENT_DIR . '/mu-plugins/endurance-php-edge.php' ) ) {
 
 $cache_settings = get_option( 'mm_cache_settings' );
 $cache_settings = wp_parse_args( $cache_settings, $defaults );
-$php_edge_settings = get_option( 'mm_php_edge_settings' );
-$php_edge_settings = wp_parse_args( $php_edge_settings, $defaults );
+$php_edge_settings = get_option( 'mm_php_edge_settings', 'disabled' );
 ?>
 	<main id="main">
 		<div class="container">
@@ -35,7 +34,7 @@ $php_edge_settings = wp_parse_args( $php_edge_settings, $defaults );
 					<div class="row">
 						<div class="col-xs-12 col-sm-12">
 							<ol class="breadcrumb">
-								<li>Performance</li>
+								<li>Caching</li>
 							</ol>
 						</div>
 					</div>
@@ -97,20 +96,59 @@ $php_edge_settings = wp_parse_args( $php_edge_settings, $defaults );
 				</div>
 				<div class="panel-body">
 					<div class="row">
-						<div class="col-xs-12 col-sm-6">
-							PHP Edge
+						<div class="col-xs-12 col-sm-12">
+							<p>PHP is the programing language that WordPress is written in. It is what takes all the dynamic content in your admin and builds the pages that becomes your website.</p>
+						</div>
+						<div class="col-xs-12 col-sm-4">
+							PHP 5.6
 							<p style="padding-top: 15px;">
-								<img style="margin: 5px; padding-right: 10px;" class="pull-left" src="<?php echo MM_BASE_URL; ?>tmp/php.png" />
-								PHP is the programing language that WordPress is written in. Running the latest and greatest version has large performance and load time improvements. Enabling PHP Edge will allow you to always remain on the latest and greatest version.
+								<img style="margin: 5px; padding-right: 10px; height:50px;" class="pull-left" src="<?php echo MM_BASE_URL; ?>tmp/php-56.svg" />
+								PHP 5.6 is the default version of PHP on many servers. This is because it has extremely high compatibility with WordPress plugins and themes.
 							</p>
 							<?php
-							if ( 'enabled' == $php_edge_settings['page'] ) {
+							if ( 'enabled' == $php_edge_settings ) {
 								?>
-								<button data-type="php_edge" data-status="enabled" class="mojo-php_edge-toggle btn btn-primary btn-md">Disable</button>
+								<button data-type="php_edge" data-status="enabled" class="mojo-php-edge-toggle btn btn-primary btn-md">Disable</button>
 								<?php
 							} else {
 								?>
-								<button data-type="php_edge" data-status="disabled" class="mojo-php_edge-toggle btn btn-success btn-md">Enable</button>
+								<button data-type="php_edge" data-status="disabled" class="mojo-php-edge-toggle btn btn-success btn-md">Enable</button>
+								<?php
+							}
+							?>
+						</div>
+						<div class="col-xs-12 col-sm-4">
+							PHP 7
+							<p style="padding-top: 15px;">
+								<img style="margin: 5px; padding-right: 10px; height:50px;" class="pull-left" src="<?php echo MM_BASE_URL; ?>tmp/php-7.svg" />
+								PHP 7 is the version that changed the game when it comes to WordPress. PHP 7 has cut load times in half on some sites and makes more efficient use of your server resources.
+							</p>
+							<?php
+							if ( 'enabled' == $php_edge_settings ) {
+								?>
+								<button data-type="php_edge" data-status="enabled" class="mojo-php-edge-toggle btn btn-primary btn-md">Disable</button>
+								<?php
+							} else {
+								?>
+								<button data-type="php_edge" data-status="disabled" class="mojo-php-edge-toggle btn btn-success btn-md">Enable</button>
+								<?php
+							}
+							?>
+						</div>
+						<div class="col-xs-12 col-sm-4">
+							PHP Edge
+							<p style="padding-top: 15px;">
+								<img style="margin: 5px; padding-right: 10px; height:50px;" class="pull-left" src="<?php echo MM_BASE_URL; ?>tmp/php-edge.svg" />
+								PHP Edge is the latest and greatest version of PHP. This will allow your site to benefit from the incremental gains but also increases the chance of incompatible code.
+							</p>
+							<?php
+							if ( 'enabled' == $php_edge_settings ) {
+								?>
+								<button data-type="php_edge" data-status="enabled" class="mojo-php-edge-toggle btn btn-primary btn-md">Disable</button>
+								<?php
+							} else {
+								?>
+								<button data-type="php_edge" data-status="disabled" class="mojo-php-edge-toggle btn btn-success btn-md">Enable</button>
 								<?php
 							}
 							?>
@@ -164,11 +202,8 @@ jQuery( document ).ready( function( $ ) {
 
 		} );
 	} );
-} );
-</script>
-<script type="text/javascript">
-jQuery( document ).ready( function( $ ) {
-	$( '.mojo-php_edge-toggle' ).click( function () {
+
+	$( '.mojo-php-edge-toggle' ).click( function () {
 		var php_edge_data = {
 			'action'         : 'mm_php_edge',
 			'type'           : $( this ).data( 'type' ) ,
