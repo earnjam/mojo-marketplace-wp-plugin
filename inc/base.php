@@ -17,7 +17,6 @@ function mm_setup() {
 		$events['hourly'][ $event['ea'] ] = $event;
 		update_option( 'mm_cron', $events );
 		if ( mm_brand() == 'bluehost' && ! defined( 'EPE_VERSION' ) ) {
-			update_option( 'epe_php_handler', 'application/x-httpd-php70s' );
 			$source = 'https://raw.githubusercontent.com/bluehost/endurance-browser-cache/production/endurance-browser-cache.php';
 			$destination = WP_CONTENT_DIR . '/mu-plugins/endurance-php-edge.php';
 			$request = wp_remote_get( $source );
