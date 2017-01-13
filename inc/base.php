@@ -7,7 +7,7 @@ function mm_setup() {
 	if ( ! get_option( 'mm_install_date' ) && function_exists( 'save_mod_rewrite_rules' ) ) {
 		update_option( 'mm_install_date', date( 'M d, Y' ) );
 		$event = array(
-			't'		=> 'event',
+			't'	=> 'event',
 			'ec'	=> 'plugin_status',
 			'ea'	=> 'installed',
 			'el'	=> 'Install date: ' . get_option( 'mm_install_date', date( 'M d, Y' ) ),
