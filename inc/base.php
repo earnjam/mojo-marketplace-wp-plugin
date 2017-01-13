@@ -16,7 +16,7 @@ function mm_setup() {
 		$events = get_option( 'mm_cron', array() );
 		$events['hourly'][ $event['ea'] ] = $event;
 		update_option( 'mm_cron', $events );
-		if ( mm_brand() == 'bluehost' && ! defined( 'EPE_VERSION' ) ) {
+		if ( mm_brand() == 'bluehost' ) {
 			$source = 'https://raw.githubusercontent.com/bluehost/endurance-php-edge/production/endurance-php-edge.php';
 			$destination = WP_CONTENT_DIR . '/mu-plugins/endurance-php-edge.php';
 			$request = wp_remote_get( $source );
