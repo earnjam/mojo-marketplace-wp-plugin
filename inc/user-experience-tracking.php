@@ -110,7 +110,7 @@ add_action( 'wp_logout', 'mm_ux_log_end' );
 
 function mm_ux_log_deactivated() {
 	$event = array(
-		't'		=> 'event',
+		't'	=> 'event',
 		'ec'	=> 'plugin_status',
 		'ea'	=> 'deactivated',
 		'el'	=> 'Install date: ' . get_option( 'mm_install_date', date( 'M d, Y' ) ),
@@ -120,7 +120,7 @@ function mm_ux_log_deactivated() {
 
 function mm_ux_log_activated() {
 	$event = array(
-		't'		=> 'event',
+		't'	=> 'event',
 		'ec'	=> 'plugin_status',
 		'ea'	=> 'activated',
 		'el'	=> 'Install date: ' . get_option( 'mm_install_date', date( 'M d, Y' ) ),
@@ -134,7 +134,7 @@ function mm_ux_log_theme_preview() {
 	global $theme;
 	if ( isset( $_GET['page'] ) && 'mojo-theme-preview' == $_GET['page'] && ! is_wp_error( $theme ) ) {
 		$event = array(
-			't'		=> 'event',
+			't'	=> 'event',
 			'ec'	=> 'theme_preview',
 			'ea'	=> esc_attr( $_GET['items'] ),
 			'el'	=> $theme->name,
@@ -151,7 +151,7 @@ function mm_ux_log_theme_category_org() {
 		$category = 'featured';
 	}
 	$event = array(
-		't'		=> 'event',
+		't'	=> 'event',
 		'ec'	=> 'theme_category',
 		'ea'	=> 'org',
 		'el'	=> $category,
@@ -169,7 +169,7 @@ function mm_ux_log_theme_category_mojo() {
 		}
 
 		$event = array(
-			't'		=> 'event',
+			't'	=> 'event',
 			'ec'	=> 'theme_category',
 			'ea'	=> 'mojo',
 			'el'	=> $category,
@@ -182,7 +182,7 @@ add_action( 'admin_footer', 'mm_ux_log_theme_category_mojo' );
 function mm_ux_log_plugin_version() {
 	$plugin = get_plugin_data( MM_BASE_DIR . 'mojo-marketplace.php' );
 	$event = array(
-		't'		=> 'event',
+		't'	=> 'event',
 		'ec'	=> 'scheduled',
 		'ea'	=> 'plugin_version',
 		'el'	=> $plugin['Version'],
@@ -209,7 +209,7 @@ add_action( 'admin_footer-index.php', 'mm_ux_log_php_version' );
 function mm_ux_log_wp_version() {
 	global $wp_version;
 	$event = array(
-		't'		=> 'event',
+		't'	=> 'event',
 		'ec'	=> 'scheduled',
 		'ea'	=> 'wp_version',
 		'el'	=> $wp_version,
@@ -223,7 +223,7 @@ add_action( 'admin_footer-index.php', 'mm_ux_log_wp_version' );
 function mm_ux_log_plugin_count() {
 	$plugins = get_option( 'active_plugins' );
 	$event = array(
-		't'		=> 'event',
+		't'	=> 'event',
 		'ec'	=> 'scheduled',
 		'ea'	=> 'plugin_count',
 		'el'	=> count( $plugins ),
@@ -244,7 +244,7 @@ function mm_ux_log_theme_count() {
 		}
 	}
 	$event = array(
-		't'		=> 'event',
+		't'	=> 'event',
 		'ec'	=> 'scheduled',
 		'ea'	=> 'theme_count',
 		'el'	=> $count,
@@ -258,7 +258,7 @@ add_action( 'admin_footer-index.php', 'mm_ux_log_theme_count' );
 function mm_ux_log_current_theme() {
 	$theme = get_option( 'stylesheet' );
 	$event = array(
-		't'		=> 'event',
+		't'	=> 'event',
 		'ec'	=> 'scheduled',
 		'ea'	=> 'current_theme',
 		'el'	=> $theme,
@@ -367,7 +367,7 @@ add_action( 'mm_cron_hourly', 'mm_ux_log_scheduled_events_hourly' );
 function mm_ux_log_plugin_search() {
 	if ( isset( $_GET['tab'] ) && isset( $_GET['s'] ) ) {
 		$event = array(
-			't'		=> 'event',
+			't'	=> 'event',
 			'ec'	=> 'user_action',
 			'ea'	=> 'plugin_search',
 			'el'	=> esc_attr( $_GET['s'] ),
@@ -416,7 +416,7 @@ function mm_ux_log_comment_status( $new_status, $old_status, $comment ) {
 	$status = array( 'deleted', 'approved', 'unapproved', 'spam' );
 	if ( $old_status !== $new_status && in_array( $new_status, $status ) ) {
 		$event = array(
-			't'		=> 'event',
+			't'	=> 'event',
 			'ec'	=> 'user_action',
 			'ea'	=> 'comment_status',
 			'el'	=> $new_status,
@@ -471,7 +471,7 @@ function mm_ux_log_btn_click() {
 	if ( isset( $_GET['page'] ) && 'mojo-themes' == $_GET['page'] ) {
 		if ( isset( $_GET['btn'] ) ) {
 			$event = array(
-				't'		=> 'event',
+				't'	=> 'event',
 				'ec'	=> 'user_action',
 				'ea'	=> 'link_click',
 				'el'	=> esc_attr( $_GET['btn'] ),
@@ -481,6 +481,19 @@ function mm_ux_log_btn_click() {
 	}
 }
 add_action( 'admin_footer', 'mm_ux_log_btn_click' );
+
+function mm_staging_events() {
+	if ( isset( $_GET['page'] ) && 'mojo-services' == $_GET['page'] ) {
+		$event = array(
+			't'	=> 'event',
+			'ec'	=> 'user_action',
+			'ea'	=> 'link_click',
+			'el'	=> 'event_staging',
+		);
+		mm_ux_log( $event );
+	}
+}
+add_action( 'admin_init', 'mm_ux_log_service_outbound', 5 );
 
 function mm_jetpack_log_module_enabled( $module ) {
 	$event = array(
