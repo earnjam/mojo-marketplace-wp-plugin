@@ -483,7 +483,7 @@ function mm_ux_log_btn_click() {
 add_action( 'admin_footer', 'mm_ux_log_btn_click' );
 
 function mm_staging_events() {
-	if ( isset( $_GET['page'] ) && 'mojo-services' == $_GET['page'] ) {
+	if ( isset( $_GET['page'] ) && 'staging' == $_GET['page'] ) {
 		$event = array(
 			't'	=> 'event',
 			'ec'	=> 'user_action',
@@ -493,7 +493,7 @@ function mm_staging_events() {
 		mm_ux_log( $event );
 	}
 }
-add_action( 'admin_init', 'mm_ux_log_service_outbound', 5 );
+add_action( 'admin_init', 'mm_staging_event_outbound', 5 );
 
 function mm_jetpack_log_module_enabled( $module ) {
 	$event = array(
