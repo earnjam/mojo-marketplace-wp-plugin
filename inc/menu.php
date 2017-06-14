@@ -113,6 +113,7 @@ function mm_staging_menu() {
 
 	$current_compat = get_transient( 'mm_compat_check', false );
 	if ( false === $current_compat ) {
+		set_transient( 'mm_compat_check', 'incompatible', DAY_IN_SECONDS * 30 );
 		$json = wp_remote_get( add_query_arg( array( 'action' => 'mm_compat_check' ), admin_url( 'admin-ajax.php' ) ), array( 'timeout' => 10, 'cookies' => $_COOKIE ) );
 
 		if ( ! is_wp_error( $json ) ) {
