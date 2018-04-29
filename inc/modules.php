@@ -2,7 +2,7 @@
 
 function mm_is_module_active( $module ) {
 	$default_modules = array();
-	$active_modules = get_option( 'mm_active_modules' );
+	$active_modules = get_option( 'mm_active_modules', array() );
 	return in_array( $module, $active_modules );
 }
 
