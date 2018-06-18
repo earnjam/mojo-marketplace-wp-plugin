@@ -136,3 +136,61 @@ function mm_cs_content() {
 		require( MM_BASE_DIR . 'pages/coming-soon/mojo.php' );
 	}
 }
+
+// Handle Ajax response
+function mm_coming_soon_subscribe() {
+
+  	//if ( wp_verify_nonce( $_POST['nonce'], 'mm_nonce-coming-soon-subscribe' ) ) {
+	
+		$response 	= array();
+		$email 		= sanitize_email( $_POST['email'] );
+		
+		// Initialize JetPack_Subscriptions
+		$jetpack 	= Jetpack_Subscriptions::init();
+		// Get JetPack response
+		$response 	= $jetpack->subscribe( $email );
+
+		// generate the response
+		//$response = json_encode( $response );
+		// response header type
+		//header( "Content-Type: application/json" );
+		//echo $response;
+	
+
+		//$mm_error = json_encode( $mm_error );
+		//echo '<pre>';
+		//	var_dump( $response );
+		//echo '</pre>';
+/*
+	    if ( is_valid_email( $_POST['email'] ) ) {
+
+		    //if ( isset( $jetpack ) ) {
+
+			    //jetpack accepted
+			    $response['message'] = __( 'Email has been added' );
+			    $response['status'] = 'success';
+
+		    //} else {
+
+			    //unable to add email to list (jetpack rejected)
+			    //$response['message'] = __( 'Unable to add email' );
+			    //$response['status'] = 'error';
+
+		    //}
+
+	    } else {
+
+	      $response['message'] = __( 'Please provide a valid email address' );
+	      $response['status'] = 'error';
+
+	    }
+*/
+  	//}
+
+  	wp_send_json( $response );
+
+  //exit;
+
+}
+add_action( 'wp_ajax_mm_coming_soon_subscribe', 'mm_coming_soon_subscribe' );
+add_action( 'wp_ajax_nopriv_mm_coming_soon_subscribe', 'mm_coming_soon_subscribe' );
