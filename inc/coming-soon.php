@@ -148,7 +148,7 @@ function mm_coming_soon_subscribe() {
 		// Initialize JetPack_Subscriptions
 		$jetpack 	= Jetpack_Subscriptions::init();
 		// Get JetPack response
-		$response 	= $jetpack->subscribe( $email );
+		$response 	= $jetpack->subscribe( $email, 0, false );
 
 		// generate the response
 		//$response = json_encode( $response );
