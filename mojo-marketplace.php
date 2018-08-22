@@ -42,6 +42,7 @@ require_once( MM_BASE_DIR . 'inc/updates.php' );
 require_once( MM_BASE_DIR . 'inc/coming-soon.php' );
 require_once( MM_BASE_DIR . 'inc/tests.php' );
 require_once( MM_BASE_DIR . 'inc/performance.php' );
+require_once( MM_BASE_DIR . 'inc/business-reviews.php' );
 mm_require( MM_BASE_DIR . 'inc/branding.php' );
 mm_require( MM_BASE_DIR . 'inc/sso.php' );
 if ( mm_jetpack_bluehost_only() ) {
